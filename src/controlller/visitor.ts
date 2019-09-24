@@ -23,6 +23,7 @@ export class VisitorController {
       counter.count_pv = 1;
       counter.count_uv = 1;
       visitor.history.push(referer);
+      await visitor.save();
     } else {
       counter.count_pv ++;
       if (visitor.history.includes(referer) === false) {
