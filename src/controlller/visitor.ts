@@ -28,8 +28,9 @@ export class VisitorController {
       if (visitor.history.includes(referer) === false) {
         counter.count_uv ++;
         visitor.history.push(referer);
+        await visitor.save();   
       }
-      await visitor.save();      
+      await counter.save();
     }
     return ctx.success({ data: { pv: counter.count_pv, uv: counter.count_uv } });     
   }
