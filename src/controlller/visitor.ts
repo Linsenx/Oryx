@@ -22,7 +22,7 @@ export class VisitorController {
       counter.referer = referer;
       counter.count_pv = 1;
       counter.count_uv = 1;
-      await counter.save();
+      visitor.history.push(referer);
     } else {
       counter.count_pv ++;
       if (visitor.history.includes(referer) === false) {
@@ -30,8 +30,8 @@ export class VisitorController {
         visitor.history.push(referer);
         await visitor.save();   
       }
-      await counter.save();
     }
+    await counter.save(); 
     return ctx.success({ data: { pv: counter.count_pv, uv: counter.count_uv } });     
   }
 }
