@@ -27,8 +27,7 @@ const visitorSchema: Schema = new Schema({
 const visitorCounterSchema: Schema = new Schema({
   referer: String,
   count_pv: Number,
-  count_uv: Number,
-  visitor: [String]
+  count_uv: Number
 });
 
 export const Visitor: Model<IVisitor> = model<IVisitor>("Visitor", visitorSchema);
