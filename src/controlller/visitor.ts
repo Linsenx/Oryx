@@ -1,6 +1,5 @@
 import { CustomContext } from '../utils/customContext';
-import { VisitorCounter, IVisitorCounter } from '../model';
-import * as dayjs from 'dayjs';
+import { VisitorCounter, IVisitorCounter, IVisitor, Visitor } from '../model';
 
 export class VisitorController {
   static async visit(ctx: CustomContext) {
@@ -8,29 +7,30 @@ export class VisitorController {
     if (referer === undefined) {
       return ctx.error({ message: 'please provide the referer' });
     }
-    const thisWeek: Date = dayjs().startOf('week').toDate();
-    const counterThisWeek: IVisitorCounter = await VisitorCounter.findOne({ referer, date: thisWeek });
-    if (counterThisWeek === null) {
-      const newCounter = new VisitorCounter();
-      newCounter.referer = referer;
-      newCounter.date = thisWeek;
-      newCounter.count_pv = 1;
-      newCounter.count_uv = 1;
-      newCounter.visitor = [ctx.getip()];
-      await newCounter.save();
-    } else {
-      counterThisWeek.count_pv ++;
-      const ip = ctx.getip();
-      if (counterThisWeek.visitor.includes(ip) === false) {
-        counterThisWeek.count_uv ++;
-        counterThisWeek.visitor.push(ip);
-      }
-      await counterThisWeek.save();
+
+    let visitor: IVisitor = await Visitor.findOne({ ip: ctx.getip() });
+    if (visitor === null) {
+      visitor = new Visitor();
+      visitor.ip = ctx.getip();
+      visitor.history = [];
+      await visitor.save();
     }
-    let sumCounterPV: number = 0; 
-    let sumCounterUV: number = 0;
-    const countersTotal: IVisitorCounter[] = await VisitorCounter.find({ referer });
-    countersTotal.forEach(c => { sumCounterPV += c.count_pv; sumCounterUV += c.count_uv; });
-    return ctx.success({ data: { pv: sumCounterPV, uv: sumCounterUV } });
+
+    let counter: IVisitorCounter = await VisitorCounter.findOne({ referer });
+    if (counter === null) {
+      counter = new VisitorCounter();
+      counter.referer = referer;
+      counter.count_pv = 1;
+      counter.count_uv = 1;
+      await counter.save();
+    } else {
+      counter.count_pv ++;
+      if (visitor.history.includes(referer) === false) {
+        counter.count_uv ++;
+        visitor.history.push(referer);
+        await visitor.save();
+      }
+    }
+    return ctx.success({ data: { pv: counter.count_pv, uv: counter.count_uv } });     
   }
 }

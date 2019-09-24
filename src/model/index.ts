@@ -1,1 +1,1 @@
-export { VisitorCounter, IVisitorCounter } from './visitorCounter';
+export { VisitorCounter, IVisitorCounter, IVisitor, Visitor } from './visitorCounter';
